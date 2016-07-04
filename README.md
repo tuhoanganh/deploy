@@ -15,12 +15,12 @@
 
 ##  Một số công việc đã và đang thực hiện  
 ### I. Triển khai OpenCPS trên Server vật lý  
-##### 1. Cài đặt MariaDB Master Slave  
+#### 1. Cài đặt MariaDB Master Slave  
  * Chi tiết tại thư mục	opencps-mariadb-master-slave
  
  > https://github.com/VietOpenCPS/deploy/tree/master/opencps-mariadb-master-slave   
 
-##### 2. Triển khai ứng dụng OpenCPS  
+#### 2. Triển khai ứng dụng OpenCPS  
 
 ### II. Triển khai OpenCPS trên Docker
 #### 1. Quy trình đóng gói, hướng dẫn triển khai ứng dụng OpenCPS sử dụng Docker images  
