@@ -32,12 +32,12 @@
  * Triển khai ứng dụng OpenCPS bằng Docker theo mô hình một container: Cả ứng dụng và database chạy trên cùng một container.  
  * Triển khai ứng dụng OpenCPS bằng Docker theo mô hình hai container: Ứng dụng và database chạy trên hai container khác nhau.  
 
-#### 1.1. Triển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 container  
+1.1. Triển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 container  
  * Chi tiết tại thư mục dockerize-all-in-one-container
  
  > https://github.com/VietOpenCPS/deploy/tree/master/opencps-dockerize/dockerize-all-in-one-container     
 
-#### 1.2.  Triển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 containerTriển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 container  
+1.2.  Triển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 containerTriển khai ứng dụng OpenCPS bằng Docker theo mô hình 2 container  
  * Chi tiết tại thư mục	dockerize-all-in-two-containers
  
  > https://github.com/VietOpenCPS/deploy/tree/master/opencps-dockerize/dockerize-all-in-two-containers  
