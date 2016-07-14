@@ -144,7 +144,7 @@ echo $DIR_CURR
 if [ -d "$DIR_CURR" ]; then
   
   echo -n "Folder exists. Please type y for overried folder -- "
-  echo -n " y/n"
+  echo -n " y/n: "
   read text
   echo "You entered : $text"
   
