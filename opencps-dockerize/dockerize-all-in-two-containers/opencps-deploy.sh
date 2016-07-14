@@ -148,6 +148,8 @@ if [ -d "$DIR_CURR" ]; then
   read text
   echo "You entered : $text"
   
+  #Do whatever you want
+
   if [ $text == "y" ]; then
     svn export https://github.com/VietOpenCPS/deploy.git/trunk/opencps-dockerize/dockerize-all-in-two-containers/docker-compose-allintwo --force
     sh -c `cd $DIR_CURR && docker-compose -f docker-compose.yml up -d`
@@ -159,5 +161,24 @@ if [ -d "$DIR_CURR" ]; then
 else
   svn export https://github.com/VietOpenCPS/deploy/trunk/opencps-dockerize/dockerize-all-in-two-containers/docker-compose-allintwo
   sh -c `cd $DIR_CURR && docker-compose -f docker-compose.yml up -d`
-  echo "Done! You can open browser with the address: localhost:8080 for testing application. Thanks"
+  #SERVER=localhost
+  #PORT=3306
+  #`nc -z -v -w5 $SERVER $PORT`
+  #result1=$?
+  #if [  "$result1" != 0 ]; then
+  #  echo  'port 3306 is closed'
+  #else
+  #  echo 'port 3306 is open'
+   # docker start dockercomposeallintwo_liferay_1
+  #fi
+  
 fi
+sleep 240
+name='dockercomposeallintwo_liferay_1'
+echo $name
+container_id=`docker ps  --filter="name=$name" -q`
+echo $container_id 
+docker stop $container_id
+sleep 5
+docker start $container_id
+echo "Done! You can open browser with the address: localhost:8080 for testing application. Thanks"
