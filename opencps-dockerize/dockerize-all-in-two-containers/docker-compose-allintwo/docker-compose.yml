@@ -16,7 +16,6 @@ services:
         links:
           - mariadb
         networks:
-          - front-tier
           - back-tier
 
     mariadb:
@@ -48,6 +47,5 @@ services:
 #     db-data:
 
 networks:
-    front-tier:
     back-tier:
 
