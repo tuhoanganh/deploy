@@ -26,7 +26,7 @@ services:
             - ./mariadb-init-data/:/docker-entrypoint-initdb.d/
             - ./mariadb-mycnf/my.cnf:/etc/mysql/my.cnf
         environment:
-            - MYSQL_ROOT_PASSWORD=lab@secret
+            - MYSQL_ROOT_PASSWORD=
             - MYSQL_USER=liferay
             - MYSQL_PASSWORD=lab@123
             - MYSQL_DATABASE=opencps10
