@@ -1,4 +1,8 @@
 # Triển khai MariaDB Master-Slave
+###Mục tiêu:
+- Triển khai MariaDB Master-Slave bằng script trên 2 Node
+- Import OpenCPS database và đồng bộ giữa Master và Slave.
+
 ###Môi trường cài đặt:
 - Database version: MariaDB 10.1 (Stable)
 - OS: Centos 7.2 64bit
@@ -26,11 +30,11 @@ Slave Server:
 ```
 *Lưu ý: Sau khi trên Master Server chạy xong thì mới bắt đầu chạy Slave.sh trên Slave Server.*
 
-Tiế theo sẽ tiến hành Import dữ liệu trên Master
+Tiếp theo sẽ tiến hành Import dữ liệu trên Master
 ```
 #ImportDatabase.sh
 ```
-Trong qusa trình chạy tool import này chương trình sẽ hỏi mật khẩu root Master Server 
+Trong quá trình chạy tool import này chương trình sẽ hỏi mật khẩu root Master Server 
 
 Kiểm tra lại dữ liệu trên Master và Slave.
 ```
