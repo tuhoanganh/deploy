@@ -1,5 +1,5 @@
 # OpenCPS is the open source Core Public Services software
-# Copyright (C) 2017-present OpenCPS community
+# Copyright (C) 2016-present OpenCPS community
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -42,6 +42,8 @@ OPENCPS_SDK="/opt/opencps"
 APP_NAME="opencps-portlet"
 APP_WEBINF="$OPENCPS_SDK/portlets/$APP_NAME/docroot/WEB-INF"
 APP_BUILDXML="$OPENCPS_SDK/portlets/$APP_NAME/build.xml"
+APP_BUILDXML_HOOK="$OPENCPS_SDK/hooks/build.xml"
+APP_BUILDXML_THEME="$OPENCPS_SDK/themes/build.xml"
 
 SERVICE_ACCOUNT="src/org/opencps/accountmgt/dao/service.xml"
 SERVICE_DATA="src/org/opencps/datamgt/dao/service.xml"
@@ -133,7 +135,7 @@ else
    echo 'NOT FOUND'
    sudo mkdir /usr/java >> /dev/null 2>&1
    echo -n '[INFO] Downloading Oracle JDK 7u79 -'
-   download $ORACLEJDK -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+   download $ORACLEJDK -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
    if [[ $ERR != 1 ]]; then
         export md5check=$(md5sum jdk-7u79-linux-x64.rpm | awk '{print $1}')
         export md5basejdk=$(echo '8486da4cdc4123f5c4f080d279f07712')
@@ -155,7 +157,7 @@ else
         sudo alternatives --set java /usr/java/jdk1.7.0_79/jre/bin/java
         echo '[INFO] Oracle JDK 7u79 has been installed!'
    else
-        echo -e "${red}[ERROR]${nc} Download process failed. Check /tmp/opencps.log for more information"
+        echo -e "${red}[ERROR]${nc} Download process failed. Check /tmp/build_opencps.log for more information"
         return
    fi
 fi
@@ -167,7 +169,7 @@ if [[  $ant_ver == "Apache Ant"* ]];then
 else
     echo 'NOT FOUND'
     echo -n '[INFO] Downloading Ant 1.9.7 -'
-    download $ANT -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+    download $ANT -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
     if [[ $ERR != 1 ]]; then
         export md5check=$(md5sum apache-ant-1.9.7-bin.tar.gz | awk '{print $1}')
         export md5baseant=$(echo 'bc1d9e5fe73eee5c50b26ed411fb0119')
@@ -190,7 +192,7 @@ else
     sudo echo 'export PATH=$PATH:$ANT_HOME/bin' >> /etc/profile.d/env.sh
     source /etc/profile.d/env.sh
     else
-        echo -e "${red}[ERROR]${nc} Download process failed. Check /tmp/opencps.log for more information"
+        echo -e "${red}[ERROR]${nc} Download process failed. Check /tmp/build_opencps.log for more information"
         return
     fi
 fi
@@ -199,7 +201,7 @@ echo "==========================================================================
 echo "||  Download Liferay Bundle with Jboss 6.2.5GA6 and Liferay Plugins SDK 6.2  ||" 
 echo "==============================================================================="
 echo -n '[INFO] Downloading Liferay Portal 6.2.5GA6 -'
-download $LIFERAY -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+download $LIFERAY -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     echo -n '[INFO] Extrating Liferay: '
     tar zxf /tmp/liferay_opencps.tar.gz -C /opt >> /dev/null 2>&1
@@ -211,7 +213,7 @@ else
 fi
 
 echo -n  '[INFO] Downloading Liferay Plugins SDK 6.2 -'
-download $LIFERAYSDK -P /tmp 2> /tmp/opencps.log ||ERR=1
+download $LIFERAYSDK -P /tmp 2> /tmp/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     sudo unzip -q /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip -d /opt/ >> /dev/null 2>&1 && sudo mv /opt/liferay-plugins-sdk-6.2 /opt/sdk
     sudo rm -rf /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip
@@ -226,7 +228,7 @@ echo "================================================"
 export hname=$(hostname)
 echo '120.0.0.1  '$hname >> /etc/hosts
 echo -n '[INFO] Downloading OpenCPS Library -'
-download $LIBRARYSDK -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+download $LIBRARYSDK -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     cd /tmp/
     sudo tar zxvf opencps_sdk_lib.tar.gz > /dev/null 2>&1
@@ -237,7 +239,7 @@ else
 fi
 
 echo -n '[INFO] Downloading Ant Library -'
-download $LIBRARYANT -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+download $LIBRARYANT -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     cd /tmp/
     sudo tar zxvf ant_lib.tar.gz > /dev/null 2>&1
@@ -257,7 +259,7 @@ echo -n '[INFO] Download Source Code -'
 #git checkout develop
 #git fetch  https://github.com/VietOpenCPS/opencps.git develop
 #git merge FETCH_HEAD
-download $OPENCPS -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+download $OPENCPS -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     cd /opt/
     echo -n '[INFO] Extracting Source Code to /opt/opencps: '
@@ -442,7 +444,7 @@ else
 fi
 
 cd $APP_WEBINF/src/org/opencps/api/service/base/ && rm -rf ApiServiceLocalServiceBaseImpl.java 
-download $APISERVICE -P $APP_WEBINF//src/org/opencps/api/service/base/ 2>&1 >> /dev/null
+download $APISERVICE -P $APP_WEBINF/src/org/opencps/api/service/base/ 2>&1 >> /dev/null
 
 echo -n "[INFO] Compile: "
 $ANT_HOME/bin/ant -buildfile $APP_BUILDXML compile >> /tmp/build_opencps.log || ERR=1
@@ -471,15 +473,15 @@ else
     return
 fi
 
-touch /opt/opencps/hooks/opencps-hook/build.xml
-echo '<?xml version="1.0"?>' > /opt/opencps/hooks/opencps-hook/build.xml
-echo '<!DOCTYPE project>' >> /opt/opencps/hooks/opencps-hook/build.xml
-echo '<project name="opencps-hook" basedir="." default="deploy">' >> /opt/opencps/hooks/opencps-hook/build.xml
-echo '<import file="../build-common-hook.xml"/>' >> /opt/opencps/hooks/opencps-hook/build.xml
-echo '</project>' >> /opt/opencps/hooks/opencps-hook/build.xml
+touch $OPENCPS_SDK/hooks/opencps-hook/build.xml
+echo '<?xml version="1.0"?>' > $OPENCPS_SDK/hooks/opencps-hook/build.xml
+echo '<!DOCTYPE project>' >> $OPENCPS_SDK/hooks/opencps-hook/build.xml
+echo '<project name="opencps-hook" basedir="." default="deploy">' >> $OPENCPS_SDK/hooks/opencps-hook/build.xml
+echo '<import file="../build-common-hook.xml"/>' >> $OPENCPS_SDK/hooks/opencps-hook/build.xml
+echo '</project>' >> $OPENCPS_SDK/hooks/opencps-hook/build.xml
 
 echo -n "[INFO] Deploy Opencps Hooks: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_HOOK deploy >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -488,13 +490,10 @@ else
 fi
 
 echo -n "[INFO] Deploy Opencps Themes: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_THEME deploy >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
-
-echo "[INFO] Building OpenCPS process Succes."
-echo "[INFO] Files deploy was stored in /opt/server/deploy"
