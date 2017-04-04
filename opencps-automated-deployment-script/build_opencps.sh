@@ -1,5 +1,5 @@
 # OpenCPS is the open source Core Public Services software
-# Copyright (C) 2016-present OpenCPS community
+# Copyright (C) 2017-present OpenCPS community
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -21,18 +21,18 @@ nc='\033[0m'
 
 
 #### Prebuild Variables ###
-LIFERAY=$(echo 'http://resource.opencps.vn/opencps1.8.tar.gz')
+LIFERAY=$(echo 'http://resource.opencps.vn/liferay_opencps.tar.gz')
 LIFERAYSDK=$(echo 'http://downloads.sourceforge.net/project/lportal/Liferay%20Portal/6.2.5%20GA6/liferay-plugins-sdk-6.2-ce-ga6-20160112152609836.zip')
-#export ORACLEJDK=$(echo 'http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.rpm')
-#export ORACLEJDKbak=$(echo 'https://www.dropbox.com/s/dehjmpfpo29x4s1/jdk-7u79-linux-x64.rpm')
-#export opencps=$(echo 'https://github.com/VietOpenCPS/opencps.git')
-#export ant=$(echo 'https://www.apache.org/dist/ant/binaries/apache-ant-1.9.7-bin.tar.gz')
-#export opencps=$(echo 'https://github.com/VietOpenCPS/opencps/archive/rc-1.8-issues-fix.zip')
+#ORACLEJDK=$(echo 'http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.rpm')
+#ORACLEJDKbak=$(echo 'https://www.dropbox.com/s/dehjmpfpo29x4s1/jdk-7u79-linux-x64.rpm')
+#OPENCPS=$(echo 'https://github.com/VietOpenCPS/opencps.git')
+#ant=$(echo 'https://www.apache.org/dist/ant/binaries/apache-ant-1.9.7-bin.tar.gz')
 ORACLEJDK=$(echo 'http://resource.opencps.vn/jdk-7u79-linux-x64.rpm')
 ANT=$(echo 'http://resource.opencps.vn/apache-ant-1.9.7-bin.tar.gz')
 OPENCPS=$(echo 'http://resource.opencps.vn/rc-1.8-issues-fix.zip')
-OPENCPSDB=$(echo 'http://resource.opencps.vn/db_opencps1.8.tar.gz')
-LIBRARY=$(echo 'http://resource.opencps.vn/warlib.tar.gz')
+OPENCPSDB=$(echo 'http://resource.opencps.vn/opencps_db1.8.tar.gz')
+LIBRARYSDK=$(echo 'http://resource.opencps.vn/opencps_sdk_lib.tar.gz')
+LIBRARYANT=$(echo 'http://resource.opencps.vn/ant_lib.tar.gz')
 COMMONPLUGIN=$(echo 'http://resource.opencps.vn/build-common-plugin.xml')
 LIBHTTP=$(echo 'http://resource.opencps.vn/httpclient-osgi-4.3.jar')
 APISERVICE=$(echo 'http://resource.opencps.vn/ApiServiceLocalServiceBaseImpl.java')
@@ -107,26 +107,6 @@ else
         echo -e "${red}[ERROR]${nc} Something wrong with network connection, please resolv the network problem or try again late"
         return;
    fi
-fi
-
-pkg4=$(rpm -qa| grep ntp)
-echo -n '[INFO] Checking ntp: '
-if [[ "$pkg4" == *"ntp"*  ]];then
-    echo -e "${green}OK${nc}"
-else
-    echo 'NOT FOUND'
-    echo -n '[INFO] Installing ntp: '; sudo yum -y install ntp >> /dev/null 2>&1
-    pkg4=$(rpm -qa| grep ntp)
-    if [[ "$pkg4" == *"ntp"*  ]];then
-        echo -e "${green}DONE${nc}"
-	sudo cp -rf /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime >> /dev/null 2>&1
-        sudo service ntpd start >> /dev/null 2>&1
-        sudo chkconfig ntpd on >> /dev/null 2>&1
-	sudo ntpdate 0.centos.pool.ntp.org >> /dev/null 2>&1
-    else
-        echo -e "${red}[ERROR]${nc} Something wrong with network connection, please resolv the network problem or try again late"
-        return;
-    fi
 fi
 
 
@@ -215,19 +195,18 @@ else
     fi
 fi
 
-echo "==========================================================================="
-echo "||  Install Liferay Bundle with Jboss 7.1.3 and Liferay Plugins SDK 6.2  ||" 
-echo "==========================================================================="
-#cd /opt/
+echo "==============================================================================="
+echo "||  Download Liferay Bundle with Jboss 6.2.5GA6 and Liferay Plugins SDK 6.2  ||" 
+echo "==============================================================================="
 echo -n '[INFO] Downloading Liferay Portal 6.2.5GA6 -'
 download $LIFERAY -P /tmp/ 2> /tmp/opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     echo -n '[INFO] Extrating Liferay: '
-    tar zxf liferay_opencps.tar.gz -C /opt >> /dev/null 2>&1
+    tar zxf /tmp/liferay_opencps.tar.gz -C /opt >> /dev/null 2>&1
     echo -e "${green}DONE${nc}"
     sudo rm -rf /tmp/liferay_opencps.tar.gz
 else
-    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/opencps_err.log for more infomation"
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
@@ -237,7 +216,7 @@ if [[ $ERR != 1 ]] ; then
     sudo unzip -q /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip -d /opt/ >> /dev/null 2>&1 && sudo mv /opt/liferay-plugins-sdk-6.2 /opt/sdk
     sudo rm -rf /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip
 else
-    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/opencps_err.log for more infomation"
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
@@ -246,26 +225,37 @@ echo "||  Downlad library for building file deploy  ||"
 echo "================================================"
 export hname=$(hostname)
 echo '120.0.0.1  '$hname >> /etc/hosts
-echo -n '[INFO] Downloading Library for building war file -'
-download $LIBRARY -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+echo -n '[INFO] Downloading OpenCPS Library -'
+download $LIBRARYSDK -P /tmp/ 2> /tmp/opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     cd /tmp/
-    sudo tar zxvf warlib.tar.gz > /dev/null 2>&1
-    sudo rm -rf /tmp/warlib.tar.gz
+    sudo tar zxvf opencps_sdk_lib.tar.gz > /dev/null 2>&1
+    sudo rm -rf /tmp/opencps_sdk_lib.tar.gz
 else
-    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/opencps_err.log for more infomation"
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
-echo "======================================================================"
-echo "||   Git Clone OpenCPS from https://github.com/VietOpenCPS/opencps  ||" 
-echo "======================================================================"
+echo -n '[INFO] Downloading Ant Library -'
+download $LIBRARYANT -P /tmp/ 2> /tmp/opencps.log ||ERR=1
+if [[ $ERR != 1 ]] ; then
+    cd /tmp/
+    sudo tar zxvf ant_lib.tar.gz > /dev/null 2>&1
+    sudo rm -rf /tmp/ant_lib.tar.gz
+else
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
+    return
+fi
+
+echo "====================================================================="
+echo "||   Download OpenCPS from https://github.com/VietOpenCPS/opencps  ||" 
+echo "====================================================================="
 source /etc/profile.d/env.sh
-echo -n '[INFO] Downloading Source Code -'
-#cd /opt/ && git clone $opencps
+echo -n '[INFO] Download Source Code -'
+#cd /opt/ && git clone $OPENCPS
 #cd /opt/opencps/
-#git checkout rc-1.8-issues-fix
-#git fetch  https://github.com/VietOpenCPS/opencps.git rc-1.8-issues-fix
+#git checkout develop
+#git fetch  https://github.com/VietOpenCPS/opencps.git develop
 #git merge FETCH_HEAD
 download $OPENCPS -P /tmp/ 2> /tmp/opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
@@ -276,20 +266,20 @@ if [[ $ERR != 1 ]] ; then
     sudo rm -rf /tmp/rc-1.8-issues-fix.zip
     echo -e "${green}DONE${nc}"
 else
-    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/opencps_err.log for more infomation"
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
-echo "============================================"
+echo "=============================================="
 echo "||   Preconfigure for building file deploy  ||" 
-echo "============================================"
+echo "=============================================="
 echo -n "[INFO] Preconfiguring Source Code:"
-cd /opt && sudo \cp -r sdk/* opencps/ 
+cd /opt && sudo \cp -r sdk/* opencps/
 sudo rm -rf /opt/sdk
-sudo sed -i '341d' /opt/opencps/build.properties
-sudo sed -i '341i ivy.jar.url=https://repository.liferay.com/nexus/content/repositories/liferay-public-snapshots/com/liferay/org.apache.ivy/${ivy.version}/org.apache.ivy-${ivy.version}.jar' /opt/opencps/build.properties
+sudo sed -i '341d' $OPENCPS_SDK/build.properties
+sudo sed -i '341i ivy.jar.url=https://repository.liferay.com/nexus/content/repositories/liferay-public-snapshots/com/liferay/org.apache.ivy/${ivy.version}/org.apache.ivy-${ivy.version}.jar' $OPENCPS_SDK/build.properties
 export user=$(id -u -n)
-sudo touch /opt/opencps/build.${user}.properties
+sudo touch $OPENCPS_SDK/build.${user}.properties
 export servertype=$(ls /opt/server/ |grep 'jboss*\|tomcat*')
 
 if [[ "$servertype" == *"jboss"*  ]];then
@@ -308,18 +298,21 @@ else
   sudo echo 'app.server.tomcat.lib.global.dir = ${app.server.tomcat.dir}/lib/ext' >> /opt/opencps/build.${user}.properties
   sudo echo 'app.server.tomcat.portal.dir = ${app.server.tomcat.dir}/webapps/ROOT' >> /opt/opencps/build.${user}.properties
 fi
-sudo \cp -rf /tmp/lib/* /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/lib/ && sudo rm -rf /tmp/lib/ warlib.tar.gz
-download $COMMONPLUGIN -P -N /opt/opencps/
-sudo sed -i -e "s/ant.build.javac.source=1.6/ant.build.javac.source=1.7/" /opt/opencps/build.properties 
-sudo sed -i -e "s/ant.build.javac.target=1.6/ant.build.javac.target=1.7/" /opt/opencps/build.properties
-download $LIBHTTP -P -N /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/lib/
+
+sudo \cp -rf /tmp/lib/* $APP_WEBINF/lib/ && sudo rm -rf /tmp/lib/
+sudo \cp -rf /tmp/ant_lib/* $OPENCPS_SDK/lib && sudo rm -rf /tmp/ant_lib/
+sudo cp -rf $OPENCPS_SDK/lib/ecj.jar $ANT_HOME/lib/ecj.jar
+cd /tmp/ && download $COMMONPLUGIN -O /tmp && sudo cp -rf /tmp/build-common-plugin.xml $OPENCPS_SDK/build-common-plugin.xml && sudo rm -rf /tmp/build-common-plugin.xml
+sudo sed -i -e "s/ant.build.javac.source=1.6/ant.build.javac.source=1.7/" $OPENCPS_SDK/build.properties 
+sudo sed -i -e "s/ant.build.javac.target=1.6/ant.build.javac.target=1.7/" $OPENCPS_SDK/build.properties
+cd /tmp/ &&  download $LIBHTTP -O /tmp > /dev/null 2>&1 && sudo cp -rf /tmp/httpclient-osgi-4.3.jar $APP_WEBINF/lib/httpclient-osgi-4.3.jar && sudo rm -rf /tmp/httpclient-osgi-4.3.jar
 echo "===================================="
 echo "||  Building OpenCPS file deploy  ||" 
 echo "===================================="
 source /etc/profile.d/env.sh
-echo -n "[INFO] Installing Apache Ivy. This Process will take about 15-20 Mins, please patient: "
+echo -n "[INFO] Installing Apache Ivy: "
 sudo \cp -rf /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/src/org/opencps/accountmgt/dao/service.xml /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/
-ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml build-service >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -327,15 +320,14 @@ else
     return
 fi
 
-echo "[INFO] Create another session and  tail -f /tmp/build_opencps.log to see the building process"
 echo -n "[INFO] Build Accountmgt service: "
 \cp -f $APP_WEBINF/$SERVICE_ACCOUNT $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service > /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Datamgt service: "
@@ -345,7 +337,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Processmgt service: "
@@ -355,7 +347,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Paymentmgt service: "
@@ -365,7 +357,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Servicemgt service: "
@@ -375,7 +367,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Dossiermgt service: "
@@ -385,7 +377,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Usermgt service: "
@@ -395,7 +387,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build API service: "
@@ -405,7 +397,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Holidayconfig service: "
@@ -415,7 +407,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Statisticsmgt service: "
@@ -425,7 +417,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build Notification service: "
@@ -435,7 +427,7 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 
@@ -446,37 +438,37 @@ if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
-cd /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/src/org/opencps/api/service/base/ && rm -rf ApiServiceLocalServiceBaseImpl.java 
-download $APISERVICE -P /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/src/org/opencps/api/service/base/ 2>&1 >> /dev/null
+cd $APP_WEBINF/src/org/opencps/api/service/base/ && rm -rf ApiServiceLocalServiceBaseImpl.java 
+download $APISERVICE -P $APP_WEBINF//src/org/opencps/api/service/base/ 2>&1 >> /dev/null
 
 echo -n "[INFO] Compile: "
-ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml compile >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML compile >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Build-taglib: "
-ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml build-taglib >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-taglib >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Deploy Opencps Porlet: "
-ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 touch /opt/opencps/hooks/opencps-hook/build.xml
@@ -487,19 +479,22 @@ echo '<import file="../build-common-hook.xml"/>' >> /opt/opencps/hooks/opencps-h
 echo '</project>' >> /opt/opencps/hooks/opencps-hook/build.xml
 
 echo -n "[INFO] Deploy Opencps Hooks: "
-ant -buildfile /opt/opencps/hooks/build.xml deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
 
 echo -n "[INFO] Deploy Opencps Themes: "
-ant -buildfile /opt/opencps/themes/build.xml deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
-    exit 1
+    return
 fi
+
+echo "[INFO] Building OpenCPS process Succes."
+echo "[INFO] Files deploy was stored in /opt/server/deploy"
