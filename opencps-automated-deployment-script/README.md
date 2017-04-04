@@ -5,7 +5,7 @@
 tiếp cận với các bản Release mới. Vì vậy Team Deploy của OpenCPS đã tự động hóa quy trình deploy OpenCPS bằng các Bash Script.
 Các bước triển khai bằng Script bao gồm các bước sau:
  * Tải Liferay Bundle with Jboss 6.2.5GA6   
- * Build file deploy từ source code tự động bằng Scr  
+ * Build file deploy từ source code tự động bằng Script
  * Cài đặt và Import Cơ sở dữ liệu   
  * Cấu hình và Start OpenCPS  
 
