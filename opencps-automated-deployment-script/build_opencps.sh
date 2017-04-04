@@ -497,3 +497,6 @@ else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
+
+echo "[INFO] Building OpenCPS from Source Code has been successful"
+echo "[INFO] OpenCPS Deployed files are stored in /opt/server/deploy"
