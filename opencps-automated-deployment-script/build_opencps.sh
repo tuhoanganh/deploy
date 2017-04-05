@@ -58,6 +58,8 @@ SERVICE_STATISTICS="src/org/opencps/statisticsmgt/dao/service.xml"
 SERVICE_NOTIFICATION="src/org/opencps/notificationmgt/dao/service.xml"
 SERVICE_POSTAL="src/org/opencps/postal/dao/service.xml"
 
+FOLDER="/tmp"
+
 echo ""
 echo "================================="
 echo "||  Install Required Packages  ||" 
@@ -116,7 +118,7 @@ echo "============================================="
 echo "||  Install Oracle JDK 7u79 and Ant 1.9.7  ||" 
 echo "============================================="
 ERR=0
-cd /tmp
+cd $FOLDER
 download()
 {
     local url=$1
@@ -136,7 +138,7 @@ else
    echo 'NOT FOUND'
    sudo mkdir /usr/java >> /dev/null 2>&1
    echo -n '[INFO] Downloading Oracle JDK 7u79 -'
-   download $ORACLEJDK -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+   download $ORACLEJDK -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
    if [[ $ERR != 1 ]]; then
         export md5check=$(md5sum jdk-7u79-linux-x64.rpm | awk '{print $1}')
         export md5basejdk=$(echo '8486da4cdc4123f5c4f080d279f07712')
@@ -144,13 +146,13 @@ else
         if [[ "$md5check" != "$md5basejdk" ]]; then
                 echo -e "${red}[ERROR]${nc} Checksum MD5... Failed!"
                 echo -e "${red}[ERROR]${nc} This file is corrupted. Please find another URL."
-                sudo rm -rf /tmp/jdk-7u79-linux-x64.rpm
+                sudo rm -rf $FOLDER/jdk-7u79-linux-x64.rpm
                 return
         fi
 
         echo -e "[INFO] Checksum MD5: ${green}OK${nc}"
-        sudo rpm -Uvh /tmp/jdk-7u79-linux-x64.rpm >> /dev/null 2>&1
-        sudo rm -rf /tmp/jdk-7u79-linux-x64.rpm
+        sudo rpm -Uvh $FOLDER/jdk-7u79-linux-x64.rpm >> /dev/null 2>&1
+        sudo rm -rf $FOLDER/jdk-7u79-linux-x64.rpm
         sudo alternatives --install /usr/bin/java java /usr/java/jdk1.7.0_79/jre/bin/java 2000
         sudo alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.7.0_79/jre/bin/javaws 2000
         sudo alternatives --install /usr/bin/javac javac /usr/java/jdk1.7.0_79/bin/javac 2000
@@ -170,7 +172,7 @@ if [[  $ant_ver == "Apache Ant"* ]];then
 else
     echo 'NOT FOUND'
     echo -n '[INFO] Downloading Ant 1.9.7 -'
-    download $ANT -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+    download $ANT -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
     if [[ $ERR != 1 ]]; then
         export md5check=$(md5sum apache-ant-1.9.7-bin.tar.gz | awk '{print $1}')
         export md5baseant=$(echo 'bc1d9e5fe73eee5c50b26ed411fb0119')
@@ -179,13 +181,13 @@ else
         if [[ "$md5check" != "$md5baseant" ]]; then
             echo -e "${red}[ERROR]${nc} Checksum MD5: Failed!"
             echo -e "${red}[ERROR]${nc} This file is corrupted.  Please find another URL."
-            sudo rm -rf /tmp/apache-ant-1.9.7-bin.tar.gz
+            sudo rm -rf $FOLDER/apache-ant-1.9.7-bin.tar.gz
             return
         fi
     echo -e "[INFO] Checksum MD5: ${green}OK${nc}"
     echo '[INFO] Ant 1.9.7 has been installed!'
-    sudo tar zxvf /tmp/apache-ant-*.tar.gz -C /usr/java >> /dev/null 2>&1
-    sudo rm -rf /tmp/apache-ant-*.tar.gz
+    sudo tar zxvf $FOLDER/apache-ant-*.tar.gz -C /usr/java >> /dev/null 2>&1
+    sudo rm -rf $FOLDER/apache-ant-*.tar.gz
     export ANT_HOME=/java/apache-ant-1.9.7
     sudo echo 'export ANT_HOME=/usr/java/apache-ant-1.9.7' >> /etc/profile.d/env.sh
     export PATH=$PATH:$ANT_HOME/bin
@@ -201,22 +203,22 @@ echo "==========================================================================
 echo "||  Download Liferay Bundle with Jboss 6.2.5GA6 and Liferay Plugins SDK 6.2  ||" 
 echo "==============================================================================="
 echo -n '[INFO] Downloading Liferay Portal 6.2.5GA6 -'
-download $LIFERAY -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+download $LIFERAY -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     echo -n '[INFO] Extrating Liferay: '
-    tar zxf /tmp/liferay_opencps.tar.gz -C /opt >> /dev/null 2>&1
+    tar zxf $FOLDER/liferay_opencps.tar.gz -C /opt >> /dev/null 2>&1
     echo -e "${green}DONE${nc}"
-    sudo rm -rf /tmp/liferay_opencps.tar.gz
+    sudo rm -rf $FOLDER/liferay_opencps.tar.gz
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
 echo -n  '[INFO] Downloading Liferay Plugins SDK 6.2 -'
-download $LIFERAYSDK -P /tmp 2> /tmp/build_opencps.log ||ERR=1
+download $LIFERAYSDK -P $FOLDER 2> $FOLDER/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
-    sudo unzip -q /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip -d /opt/ >> /dev/null 2>&1 && sudo mv /opt/liferay-plugins-sdk-6.2 /opt/sdk
-    sudo rm -rf /tmp/liferay-plugins-sdk-6.2-ce-ga6*.zip
+    sudo unzip -q $FOLDER/liferay-plugins-sdk-6.2-ce-ga6*.zip -d /opt/ >> /dev/null 2>&1 && sudo mv /opt/liferay-plugins-sdk-6.2 /opt/sdk
+    sudo rm -rf $FOLDER/liferay-plugins-sdk-6.2-ce-ga6*.zip
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
@@ -228,22 +230,22 @@ echo "================================================"
 export hname=$(hostname)
 echo '120.0.0.1  '$hname >> /etc/hosts
 echo -n '[INFO] Downloading OpenCPS Library -'
-download $LIBRARYSDK -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+download $LIBRARYSDK -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
-    cd /tmp/
+    cd $FOLDER
     sudo tar zxvf opencps_sdk_lib.tar.gz > /dev/null 2>&1
-    sudo rm -rf /tmp/opencps_sdk_lib.tar.gz
+    sudo rm -rf $FOLDER/opencps_sdk_lib.tar.gz
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
 fi
 
 echo -n '[INFO] Downloading Ant Library -'
-download $LIBRARYANT -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+download $LIBRARYANT -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
-    cd /tmp/
+    cd $FOLDER
     sudo tar zxvf ant_lib.tar.gz > /dev/null 2>&1
-    sudo rm -rf /tmp/ant_lib.tar.gz
+    sudo rm -rf $FOLDER/ant_lib.tar.gz
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
     return
@@ -259,13 +261,13 @@ echo -n '[INFO] Download Source Code -'
 #git checkout develop
 #git fetch  https://github.com/VietOpenCPS/opencps.git develop
 #git merge FETCH_HEAD
-download $OPENCPS -P /tmp/ 2> /tmp/build_opencps.log ||ERR=1
+download $OPENCPS -P $FOLDER/ 2> $FOLDER/build_opencps.log ||ERR=1
 if [[ $ERR != 1 ]] ; then
     cd /opt/
     echo -n '[INFO] Extracting Source Code to /opt/opencps: '
-    sudo unzip -q /tmp/rc-1.8-issues-fix.zip -d /opt
+    sudo unzip -q $FOLDER/rc-1.8-issues-fix.zip -d /opt
     sudo mv /opt/opencps-rc-1.8-issues-fix /opt/opencps
-    sudo rm -rf /tmp/rc-1.8-issues-fix.zip
+    sudo rm -rf $FOLDER/rc-1.8-issues-fix.zip
     echo -e "${green}DONE${nc}"
 else
     echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
@@ -301,20 +303,20 @@ else
   sudo echo 'app.server.tomcat.portal.dir = ${app.server.tomcat.dir}/webapps/ROOT' >> /opt/opencps/build.${user}.properties
 fi
 
-sudo \cp -rf /tmp/lib/* $APP_WEBINF/lib/ && sudo rm -rf /tmp/lib/
-sudo \cp -rf /tmp/ant_lib/* $OPENCPS_SDK/lib && sudo rm -rf /tmp/ant_lib/
+sudo \cp -rf $FOLDER/lib/* $APP_WEBINF/lib/ && sudo rm -rf $FOLDER/lib/
+sudo \cp -rf $FOLDER/ant_lib/* $OPENCPS_SDK/lib && sudo rm -rf $FOLDER/ant_lib/
 sudo cp -rf $OPENCPS_SDK/lib/ecj.jar $ANT_HOME/lib/ecj.jar
-cd /tmp/ && download $COMMONPLUGIN -O /tmp && sudo cp -rf /tmp/build-common-plugin.xml $OPENCPS_SDK/build-common-plugin.xml && sudo rm -rf /tmp/build-common-plugin.xml
+cd $FOLDER && download $COMMONPLUGIN -O $FOLDER && sudo cp -rf $FOLDER/build-common-plugin.xml $OPENCPS_SDK/build-common-plugin.xml && sudo rm -rf $FOLDER/build-common-plugin.xml
 sudo sed -i -e "s/ant.build.javac.source=1.6/ant.build.javac.source=1.7/" $OPENCPS_SDK/build.properties 
 sudo sed -i -e "s/ant.build.javac.target=1.6/ant.build.javac.target=1.7/" $OPENCPS_SDK/build.properties
-cd /tmp/ &&  download $LIBHTTP -O /tmp > /dev/null 2>&1 && sudo cp -rf /tmp/httpclient-osgi-4.3.jar $APP_WEBINF/lib/httpclient-osgi-4.3.jar && sudo rm -rf /tmp/httpclient-osgi-4.3.jar
+cd $FOLDER &&  download $LIBHTTP -O $FOLDER > /dev/null 2>&1 && sudo cp -rf $FOLDER/httpclient-osgi-4.3.jar $APP_WEBINF/lib/httpclient-osgi-4.3.jar && sudo rm -rf $FOLDER/httpclient-osgi-4.3.jar
 echo "===================================="
 echo "||  Building OpenCPS file deploy  ||" 
 echo "===================================="
 source /etc/profile.d/env.sh
 echo -n "[INFO] Installing Apache Ivy: "
 sudo \cp -rf /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/src/org/opencps/accountmgt/dao/service.xml /opt/opencps/portlets/opencps-portlet/docroot/WEB-INF/
-$ANT_HOME/bin/ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile /opt/opencps/portlets/opencps-portlet/build.xml build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -324,17 +326,17 @@ fi
 
 echo -n "[INFO] Build Accountmgt service: "
 \cp -f $APP_WEBINF/$SERVICE_ACCOUNT $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
-    echo -e "${red}[ERROR]${nc} Something wrong here. Please check /tmp/build_opencps.log for more infomation"
+    echo -e "${red}[ERROR]${nc} Something wrong here. Please check $FOLDER/build_opencps.log for more infomation"
     return
 fi
 
 echo -n "[INFO] Build Datamgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_DATA $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -344,7 +346,7 @@ fi
 
 echo -n "[INFO] Build Processmgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_PROCESS $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -354,7 +356,7 @@ fi
 
 echo -n "[INFO] Build Paymentmgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_PAYMENT $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -364,7 +366,7 @@ fi
 
 echo -n "[INFO] Build Servicemgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_SERVICE $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -374,7 +376,7 @@ fi
 
 echo -n "[INFO] Build Dossiermgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_DOSSIER $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -384,7 +386,7 @@ fi
 
 echo -n "[INFO] Build Usermgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_USER $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -394,7 +396,7 @@ fi
 
 echo -n "[INFO] Build API service: "
 \cp -rf $APP_WEBINF/$SERVICE_API $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -404,7 +406,7 @@ fi
 
 echo -n "[INFO] Build Holidayconfig service: "
 \cp -rf $APP_WEBINF/$SERVICE_HOLIDAY $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -414,7 +416,7 @@ fi
 
 echo -n "[INFO] Build Statisticsmgt service: "
 \cp -rf $APP_WEBINF/$SERVICE_STATISTICS $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -424,7 +426,7 @@ fi
 
 echo -n "[INFO] Build Notification service: "
 \cp -rf $APP_WEBINF/$SERVICE_NOTIFICATION $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -435,7 +437,7 @@ fi
 
 echo -n "[INFO] Build Postal service: "
 \cp -rf $APP_WEBINF/$SERVICE_POSTAL $APP_WEBINF/service.xml
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-service >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -447,7 +449,7 @@ cd $APP_WEBINF/src/org/opencps/api/service/base/ && rm -rf ApiServiceLocalServic
 download $APISERVICE -P $APP_WEBINF/src/org/opencps/api/service/base/ 2>&1 >> /dev/null
 
 echo -n "[INFO] Compile: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML compile >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML compile >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -456,7 +458,7 @@ else
 fi
 
 echo -n "[INFO] Build-taglib: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-taglib >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML build-taglib >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -465,7 +467,7 @@ else
 fi
 
 echo -n "[INFO] Deploy Opencps Porlet: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML deploy >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -481,7 +483,7 @@ echo '<import file="../build-common-hook.xml"/>' >> $OPENCPS_SDK/hooks/opencps-h
 echo '</project>' >> $OPENCPS_SDK/hooks/opencps-hook/build.xml
 
 echo -n "[INFO] Deploy Opencps Hooks: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_HOOK deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_HOOK deploy >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
@@ -490,7 +492,7 @@ else
 fi
 
 echo -n "[INFO] Deploy Opencps Themes: "
-$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_THEME deploy >> /tmp/build_opencps.log || ERR=1
+$ANT_HOME/bin/ant -buildfile $APP_BUILDXML_THEME deploy >> $FOLDER/build_opencps.log || ERR=1
 if [[ $ERR != 1 ]]; then
     echo -e "${green}DONE${nc}"
 else
