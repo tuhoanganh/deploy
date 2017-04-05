@@ -116,6 +116,7 @@ echo "============================================="
 echo "||  Install Oracle JDK 7u79 and Ant 1.9.7  ||" 
 echo "============================================="
 ERR=0
+cd /tmp
 download()
 {
     local url=$1
