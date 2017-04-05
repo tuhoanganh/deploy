@@ -185,7 +185,6 @@ else
     echo '[INFO] Ant 1.9.7 has been installed!'
     sudo tar zxvf /tmp/apache-ant-*.tar.gz -C /usr/java >> /dev/null 2>&1
     sudo rm -rf /tmp/apache-ant-*.tar.gz
-    sudo ln -s /usr/share/java/ecj.jar /usr/java/apache-ant-1.9.7/lib/ecj.jar >> /dev/null 2>&1
     export ANT_HOME=/java/apache-ant-1.9.7
     sudo echo 'export ANT_HOME=/usr/java/apache-ant-1.9.7' >> /etc/profile.d/env.sh
     export PATH=$PATH:$ANT_HOME/bin
